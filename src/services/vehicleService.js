@@ -28,5 +28,11 @@ export function generateVehicleId() {
 export function getAllVehicles() {
     if (localStorage.getItem(KEYS.vehicles) == null)
     localStorage.setItem(KEYS.vehicles, JSON.stringify([]))
-    return JSON.parse(localStorage.getItem(KEYS.vehicles));
+    let vehicles = JSON.parse(localStorage.getItem(KEYS.vehicles));
+    //map departmentID to department title
+    let departments = getDepartmentCollection();
+    return vehicles.map(x =>({
+        ...x,
+        department : departments[x.departmentId-1].title
+    }))
 }
