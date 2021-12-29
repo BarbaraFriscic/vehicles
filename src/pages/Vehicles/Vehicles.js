@@ -7,6 +7,10 @@ import useTable from "../../components/useTable";
 import * as vehicleService from "../../services/vehicleService";
 import Controls from "../../components/controls/Controls";
 import {Search} from "@material-ui/icons";
+import AddIcon from '@material-ui/icons/Add';
+import Popup from "../../components/Popup";
+import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles(theme => ({
     pageContent: {
@@ -15,6 +19,10 @@ const useStyles = makeStyles(theme => ({
         },
     searchInput:{
         width:'75%'
+    },
+    newButton: {
+        position:'absolute',
+        right:'10px'
     }
 }))
 
@@ -23,13 +31,16 @@ const headCells = [
     {id:'email', label:'Email Address (Personal)'},
     {id:'mobile', label:'Mobile Number'},
     {id:'department', label:'Department', disableSorting: true},
+    {id:'actions', label:'Actions', disableSorting: true }
 ]
 
 export default function Vehicles() {
 
     const classes = useStyles();
-    const [records, serRecords]=useState(vehicleService.getAllVehicles())
+    const [recordForEdit, setRecordForEdit] = useState(null)
+    const [records, setRecords]=useState(vehicleService.getAllVehicles())
     const[filterFn, setFilterFn] = useState({ fn: items => { return items; } })
+    const [openPopup, setOpenPopup] = useState(false)
 
     const {
         TblContainer,
@@ -50,6 +61,22 @@ export default function Vehicles() {
         })
     }
 
+    const addOrEdit = (vehicle, resetForm) => {
+        if(vehicle.id == 0)
+            vehicleService.insertVehicle(vehicle)
+            else
+            vehicleService.updateVehicle(vehicle)
+            resetForm()
+            setRecordForEdit(null)
+            setOpenPopup(false)
+            setRecords(vehicleService.getAllVehicles())
+    }
+
+    const openInPopup = item =>{
+        setRecordForEdit(item)
+        setOpenPopup(true)
+    }
+
     return(
         <>
         <PageHeader
@@ -58,7 +85,7 @@ export default function Vehicles() {
           icon = {<DriveEtaTwoToneIcon fontSize="large"/>}
           />
         <Paper className={classes.pageContent}>
-            {/* <VehicleForm /> */}
+            
             <Toolbar>
                 <Controls.Input
                     label="Search Vehicles"
@@ -69,7 +96,14 @@ export default function Vehicles() {
                             </InputAdornment>)
                         }}
                         onChange={ handleSearch }
-                    />                   
+                    />
+                    <Controls.Button 
+                    text = "Add New" 
+                    variant = "outlined"  
+                    startIcon = {<AddIcon />}
+                    className ={classes.newButton}    
+                    onClick = {() => {setOpenPopup(true); setRecordForEdit(null); }}
+                    />        
             </Toolbar>
             <TblContainer>
                 <TblHead />
@@ -81,12 +115,34 @@ export default function Vehicles() {
                                 <TableCell>{item.email}</TableCell>
                                 <TableCell>{item.mobile}</TableCell>
                                 <TableCell>{item.department}</TableCell>
+                                <TableCell>
+                                    <Controls.ActionButton
+                                    color="primary">
+                                        <EditOutlinedIcon 
+                                        fontSize="small"
+                                        onClick= {()=> {openInPopup(item)}}
+                                        />
+                                    </Controls.ActionButton>   
+                                    <Controls.ActionButton
+                                    color="secondary">
+                                        <CloseIcon fontSize="small" />
+                                    </Controls.ActionButton>   
+                                </TableCell>
                             </TableRow>))
                     }
                 </TableBody>
             </TblContainer>
             <TblPagination />
         </Paper>
+        <Popup
+            title = "Vehicle Form"
+            openPopup = {openPopup}
+            setOpenPopup={setOpenPopup}
+        >
+            <VehicleForm 
+            recordForEdit = {recordForEdit}
+                addOrEdit={addOrEdit} />
+        </Popup>
         </>
     )
 }

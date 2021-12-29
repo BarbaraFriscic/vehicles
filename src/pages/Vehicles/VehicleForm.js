@@ -22,7 +22,8 @@ const initialFValues ={
     isPermanent:false,
 }
 
-export default function VehicleForm() {
+export default function VehicleForm(props) {
+    const { addOrEdit, recordForEdit }= props
 
     const validate = (fieldValues = values) => {
         let temp = {...errors}
@@ -54,9 +55,15 @@ export default function VehicleForm() {
     const handleSubmit = e => {
         e.preventDefault()
         if (validate())
-            vehicleService.insertVehicle(values)
-            resetForm()
+            addOrEdit(values, resetForm);
     }
+
+    useEffect(() => {
+        if(recordForEdit != null)
+            setValues({
+                ...recordForEdit
+            })
+    }, [recordForEdit])
 
     return(
         <Form onSubmit={handleSubmit}>

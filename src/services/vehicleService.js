@@ -17,6 +17,13 @@ export function insertVehicle(data) {
     localStorage.setItem(KEYS.vehicles,JSON.stringify(vehicles))
 }
 
+export function updateVehicle(data) {
+    let vehicles= getAllVehicles();
+    let recordIndex = vehicles.findIndex(x => x.id == data.id);
+    vehicles[recordIndex] = { ...data }
+    localStorage.setItem(KEYS.vehicles,JSON.stringify(vehicles))
+}
+
 export function generateVehicleId() {
     if (localStorage.getItem(KEYS.vehicleId) == null)
         localStorage.setItem(KEYS.vehicleId, '0')
